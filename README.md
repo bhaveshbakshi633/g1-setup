@@ -6,6 +6,8 @@ Complete setup for running Unitree G1 humanoid robot in Isaac Lab on cloud GPU (
 
 ## 🚀 Quick Start
 
+### ⭐ RECOMMENDED: Conda Setup
+
 ```bash
 # 1. Read the guide
 cat START_HERE.md
@@ -14,12 +16,24 @@ cat NATIVE_STREAMING_GUIDE.md
 # 2. Check your system
 ./check_system.sh
 
-# 3. Run setup on Brev (30-60 min, one time)
-./setup_isaac_native_streaming.sh
+# 3. Run automated conda setup (20-30 min, one time)
+./setup_conda_automated.sh
 
-# 4. Launch simulation
+# 4. Activate environment
+conda activate isaaclab
+
+# 5. Launch simulation
 ./launch_native_streaming.sh g1_simple_test.py
 ```
+
+### Alternative: Venv Setup
+
+```bash
+./setup_complete_automated.sh  # Uses Python venv instead
+```
+
+**Why Conda?** Official Isaac Lab support, better dependencies, you already have it!
+See [CONDA_VS_VENV.md](CONDA_VS_VENV.md) for comparison.
 
 ---
 
