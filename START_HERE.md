@@ -4,9 +4,16 @@ Welcome! This guide will get you running Unitree G1 with pretrained WBC in Isaac
 
 ---
 
-## 🌐 Using Brev.dev CLI?
+## 🌐 Using Brev.dev CLI? ⭐ NEW: Native Streaming!
 
-**→ Read [BREV_SETUP.md](BREV_SETUP.md) or [BREV_CHEATSHEET.txt](BREV_CHEATSHEET.txt) first!**
+**⭐ RECOMMENDED: Isaac Sim Native WebRTC Streaming**
+→ Read **[NATIVE_STREAMING_GUIDE.md](NATIVE_STREAMING_GUIDE.md)** - Use GPU on cloud, view on your PC!
+- Lower latency (10-30ms)
+- GPU-accelerated encoding
+- Official NVIDIA client
+
+**Alternative: Custom Browser-Based Streaming**
+→ Read [BREV_SETUP.md](BREV_SETUP.md) or [BREV_CHEATSHEET.txt](BREV_CHEATSHEET.txt)
 
 Everything works perfectly with CLI-only access via Brev. No GUI needed!
 
