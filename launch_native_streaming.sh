@@ -87,6 +87,20 @@ print_warning "Make sure port $STREAMING_PORT is accessible!"
 print_info "Starting simulation in 5 seconds..."
 sleep 5
 
+# Activate conda environment
+print_info "Activating conda environment..."
+if [ -f "$HOME/miniconda3/etc/profile.d/conda.sh" ]; then
+    source "$HOME/miniconda3/etc/profile.d/conda.sh"
+    conda activate isaaclab
+    print_info "Conda environment 'isaaclab' activated"
+elif command -v conda &> /dev/null; then
+    eval "$(conda shell.bash hook)"
+    conda activate isaaclab
+    print_info "Conda environment 'isaaclab' activated"
+else
+    print_warning "Conda not found, assuming environment is already active"
+fi
+
 # Launch with native streaming
 cd "$ISAACLAB_DIR"
 
@@ -94,12 +108,7 @@ print_info "Launching Isaac Lab with native streaming..."
 echo ""
 
 # Run with streaming enabled
-./isaaclab.sh -p "$SCRIPT_FILE" \
-    --/app/window/enabled=false \
-    --/app/livestream/enabled=true \
-    --/app/livestream/port=$STREAMING_PORT \
-    --/app/livestream/websocket/enabled=true \
-    --/renderer/enabled=true \
-    --/renderer/active=true
+# Use AppLauncher's livestream flag: 0=disabled, 1=native, 2=websocket
+./isaaclab.sh -p "$SCRIPT_FILE" --livestream 1
 
 print_info "Simulation ended."
