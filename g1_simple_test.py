@@ -81,23 +81,37 @@ def main():
     print(f"Joint names: {robot.joint_names[:5]}... (showing first 5)")
     print("=" * 80 + "\n")
 
-    print("Running simulation for 5 seconds...")
+    print("Running simulation indefinitely... (Press Ctrl+C to stop)")
+    print("")
+    print("=" * 80)
+    print("WEBRTC STREAMING - CONNECTION INFO")
+    print("=" * 80)
+    print("Try connecting to EITHER of these addresses in Isaac Sim WebRTC Client:")
+    print("  Option 1: localhost:8211  (standard WebRTC port)")
+    print("  Option 2: localhost:8011  (HTTP streaming server port)")
+    print("=" * 80)
+    print("")
 
     # Get simulation timestep
     sim_dt = sim.get_physics_dt()
 
-    for i in range(500):
+    # Run indefinitely
+    step_count = 0
+    while simulation_app.is_running():
         # Step simulation
         scene.write_data_to_sim()
         sim.step()
         scene.update(sim_dt)
 
-        if i % 100 == 0:
+        # Print status every 100 steps (~1 second)
+        if step_count % 100 == 0:
             height = robot.data.root_pos_w[0, 2].item()
-            print(f"Step {i}: Robot height = {height:.3f}m")
+            print(f"Step {step_count}: Robot height = {height:.3f}m")
 
-    print("\n✓ Test completed successfully!")
-    print("G1 robot is working in Isaac Lab\n")
+        step_count += 1
+
+    print("\n✓ Simulation stopped!")
+    print("G1 robot simulation ended\n")
 
 
 if __name__ == "__main__":

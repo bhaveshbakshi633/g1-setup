@@ -106,9 +106,17 @@ cd "$ISAACLAB_DIR"
 
 print_info "Launching Isaac Lab with native streaming..."
 echo ""
+echo "When streaming starts, try connecting to:"
+echo "  - localhost:8211 (standard WebRTC port)"
+echo "  - localhost:8011 (HTTP streaming port)"
+echo ""
 
 # Run with streaming enabled
 # Use AppLauncher's livestream flag: 0=disabled, 1=native, 2=websocket
 ./isaaclab.sh -p "$SCRIPT_FILE" --livestream 1
 
 print_info "Simulation ended."
+echo ""
+print_info "Checking which ports were used..."
+lsof -i :8211 2>/dev/null && echo "✓ Port 8211 was active" || echo "✗ Port 8211 was not used"
+lsof -i :8011 2>/dev/null && echo "✓ Port 8011 was active" || echo "✗ Port 8011 was not used"
