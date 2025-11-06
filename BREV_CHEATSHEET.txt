@@ -1,0 +1,163 @@
+================================================================================
+                    BREV QUICK START CHEATSHEET
+         Unitree G1 Isaac Lab Setup - CLI Only (No GUI Needed)
+================================================================================
+
+STEP 1: UPLOAD FILES TO BREV
+────────────────────────────────────────────────────────────────────────────
+On your LOCAL machine (where you have these files):
+
+    cd /home/bhavesh/rented
+    ./upload_to_brev.sh
+
+Enter your Brev address when prompted (e.g., user@xyz123.brev.dev)
+
+OR use SCP manually:
+    scp -r * user@xyz123.brev.dev:~/g1-setup/
+
+
+STEP 2: SSH TO BREV WITH TUNNEL
+────────────────────────────────────────────────────────────────────────────
+    ssh -L 8080:localhost:8080 user@YOUR_INSTANCE.brev.dev
+
+Keep this terminal open the whole time!
+
+
+STEP 3: RUN SETUP (ONCE, TAKES 30-60 MIN)
+────────────────────────────────────────────────────────────────────────────
+    cd ~/g1-setup
+    ./check_system.sh           # Verify GPU
+    screen -S setup             # Start screen session
+    ./setup_g1_cloud.sh         # Run setup
+
+To detach screen: Ctrl+A, then press D
+To reattach: screen -r setup
+
+
+STEP 4: LAUNCH SIMULATION
+────────────────────────────────────────────────────────────────────────────
+    cd ~/g1-setup
+    ./launch_g1.sh webrtc
+
+Wait for: "WebRTC viewer available at: http://localhost:8080"
+
+
+STEP 5: VIEW IN BROWSER
+────────────────────────────────────────────────────────────────────────────
+On your LOCAL machine, open browser:
+
+    http://localhost:8080
+
+Controls:
+    W/A/S/D - Move robot
+    Q/E     - Turn
+    R       - Reset
+    P       - Pause
+
+
+COMMON COMMANDS
+────────────────────────────────────────────────────────────────────────────
+Check GPU:              nvidia-smi
+Check system:           ./check_system.sh
+Setup (once):           ./setup_g1_cloud.sh
+Launch simulation:      ./launch_g1.sh webrtc
+Test mode:              ./launch_g1.sh test
+Simple mode:            ./launch_g1.sh simple
+
+With HuggingFace:       HF_REPO='user/model' ./launch_g1.sh webrtc
+Different port:         WEBRTC_PORT=9000 ./launch_g1.sh webrtc
+
+
+SCREEN/TMUX COMMANDS
+────────────────────────────────────────────────────────────────────────────
+Start screen:           screen -S name
+Detach screen:          Ctrl+A, then D
+Reattach screen:        screen -r name
+List screens:           screen -ls
+
+Start tmux:             tmux new -s name
+Detach tmux:            Ctrl+B, then D
+Reattach tmux:          tmux attach -t name
+List tmux:              tmux ls
+
+
+TROUBLESHOOTING
+────────────────────────────────────────────────────────────────────────────
+GPU not found:          nvidia-smi
+                        (Restart Brev instance if needed)
+
+Port not accessible:    Check SSH tunnel is active:
+                        ps aux | grep "ssh.*8080"
+
+Server not starting:    ps aux | grep node
+                        ps aux | grep isaac
+
+Out of space:           df -h
+                        sudo apt-get clean
+
+Session disconnected:   screen -r setup
+                        tmux attach -t g1
+
+
+FILE LOCATIONS
+────────────────────────────────────────────────────────────────────────────
+Your files:             ~/g1-setup/
+Isaac Lab:              ~/g1_workspace/IsaacLab/
+WebRTC server:          ~/g1_workspace/webrtc_server/
+Logs:                   ~/g1_workspace/IsaacLab/logs/
+
+
+COST OPTIMIZATION
+────────────────────────────────────────────────────────────────────────────
+For TESTING (your use case):
+    ✓ Use RTX 3060 (12GB)  - $0.20-0.30/hr
+    ✓ Setup once, save snapshot
+    ✓ Destroy when not using
+
+For PRODUCTION (training, many robots):
+    ✓ Use L40S or RTX 4090
+    ✓ Load from snapshot (no setup wait)
+
+
+COMPLETE WORKFLOW
+────────────────────────────────────────────────────────────────────────────
+LOCAL:  ./upload_to_brev.sh
+LOCAL:  ssh -L 8080:localhost:8080 user@xyz.brev.dev
+
+BREV:   cd ~/g1-setup
+BREV:   ./check_system.sh
+BREV:   screen -S setup
+BREV:   ./setup_g1_cloud.sh
+        (wait 30-60 min, or detach: Ctrl+A, D)
+
+BREV:   ./launch_g1.sh webrtc
+LOCAL:  Open http://localhost:8080
+
+        (Control robot, develop, test)
+
+BREV:   Ctrl+C to stop
+        Don't forget to stop Brev instance!
+
+
+DOCUMENTATION
+────────────────────────────────────────────────────────────────────────────
+Quick start:            BREV_SETUP.md
+Detailed guide:         START_HERE.md
+Step by step:           QUICKSTART.md
+GPU options:            GPU_COMPATIBILITY.md
+Technical:              FILES_OVERVIEW.md
+Complete:               README.md
+
+
+IMPORTANT NOTES
+────────────────────────────────────────────────────────────────────────────
+✓ Everything runs HEADLESS (no GUI needed)
+✓ View via SSH tunnel + browser
+✓ Use screen/tmux for session persistence
+✓ Save snapshots after successful setup
+✓ Monitor Brev costs regularly
+✓ Start with small GPU (RTX 3060) for testing
+
+================================================================================
+Need help? Read BREV_SETUP.md for detailed instructions
+================================================================================

@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Isaac Lab - Unitree G1 Viewer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a1a;
+            color: #ffffff;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .header {
+            background: #2d2d2d;
+            padding: 15px 20px;
+            border-bottom: 2px solid #00ff88;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: #00ff88;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ff4444;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.connected {
+            background: #00ff88;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .video-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #000;
+            position: relative;
+        }
+
+        #videoCanvas {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .loading {
+            position: absolute;
+            color: #888;
+            font-size: 18px;
+        }
+
+        .controls-panel {
+            width: 300px;
+            background: #2d2d2d;
+            border-left: 1px solid #444;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .control-section {
+            margin-bottom: 25px;
+        }
+
+        .control-section h3 {
+            color: #00ff88;
+            margin-bottom: 15px;
+            font-size: 16px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 8px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        button {
+            background: #00ff88;
+            color: #1a1a1a;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            width: 100%;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #00dd77;
+        }
+
+        button:active {
+            background: #00bb66;
+        }
+
+        button:disabled {
+            background: #555;
+            color: #888;
+            cursor: not-allowed;
+        }
+
+        .keyboard-controls {
+            background: #252525;
+            padding: 15px;
+            border-radius: 4px;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .keyboard-controls kbd {
+            background: #1a1a1a;
+            padding: 2px 6px;
+            border-radius: 3px;
+            border: 1px solid #444;
+            font-family: monospace;
+        }
+
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #252525;
+            border-radius: 4px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #aaa;
+        }
+
+        .fps-counter {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Isaac Lab - Unitree G1</h1>
+            <div class="status">
+                <div class="status-indicator" id="statusIndicator"></div>
+                <span id="statusText">Disconnected</span>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="video-container">
+                <canvas id="videoCanvas"></canvas>
+                <div class="loading" id="loading">Waiting for video stream...</div>
+                <div class="fps-counter" id="fpsCounter">FPS: 0</div>
+            </div>
+
+            <div class="controls-panel">
+                <div class="control-section">
+                    <h3>Teleop Controls</h3>
+                    <div class="keyboard-controls">
+                        <div><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> - Move</div>
+                        <div><kbd>Q</kbd> <kbd>E</kbd> - Turn</div>
+                        <div><kbd>↑</kbd> <kbd>↓</kbd> - Pitch</div>
+                        <div><kbd>←</kbd> <kbd>→</kbd> - Roll</div>
+                        <div><kbd>Space</kbd> - Jump</div>
+                        <div><kbd>R</kbd> - Reset</div>
+                        <div><kbd>P</kbd> - Pause/Resume</div>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>Actions</h3>
+                    <div class="control-group">
+                        <button id="resetBtn">Reset Simulation</button>
+                    </div>
+                    <div class="control-group">
+                        <button id="pauseBtn">Pause/Resume</button>
+                    </div>
+                    <div class="control-group">
+                        <button id="standBtn">Stand Up</button>
+                    </div>
+                </div>
+
+                <div class="info">
+                    <strong>Status:</strong> <span id="infoText">Initializing...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('videoCanvas');
+        const ctx = canvas.getContext('2d');
+        const loading = document.getElementById('loading');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const statusText = document.getElementById('statusText');
+        const fpsCounter = document.getElementById('fpsCounter');
+        const infoText = document.getElementById('infoText');
+
+        let ws = null;
+        let frameCount = 0;
+        let lastFpsUpdate = Date.now();
+
+        // Connect to WebSocket server
+        function connect() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}`;
+
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                console.log('Connected to server');
+                ws.send(JSON.stringify({ type: 'viewer' }));
+                statusIndicator.classList.add('connected');
+                statusText.textContent = 'Connected';
+                infoText.textContent = 'Connected to server, waiting for simulation...';
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+
+                    if (data.type === 'frame') {
+                        // Decode base64 image and draw to canvas
+                        const img = new Image();
+                        img.onload = () => {
+                            canvas.width = img.width;
+                            canvas.height = img.height;
+                            ctx.drawImage(img, 0, 0);
+                            loading.style.display = 'none';
+
+                            // Update FPS
+                            frameCount++;
+                            const now = Date.now();
+                            if (now - lastFpsUpdate >= 1000) {
+                                const fps = Math.round(frameCount / ((now - lastFpsUpdate) / 1000));
+                                fpsCounter.textContent = `FPS: ${fps}`;
+                                frameCount = 0;
+                                lastFpsUpdate = now;
+                            }
+                        };
+                        img.src = 'data:image/jpeg;base64,' + data.frame;
+                        infoText.textContent = 'Receiving video stream';
+                    }
+                } catch (error) {
+                    console.error('Error processing message:', error);
+                }
+            };
+
+            ws.onclose = () => {
+                console.log('Disconnected from server');
+                statusIndicator.classList.remove('connected');
+                statusText.textContent = 'Disconnected';
+                infoText.textContent = 'Disconnected. Reconnecting...';
+                setTimeout(connect, 2000);
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+            };
+        }
+
+        // Send control message
+        function sendControl(action, data = {}) {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    type: 'control',
+                    action: action,
+                    data: data
+                }));
+            }
+        }
+
+        // Keyboard controls
+        const keys = {};
+        window.addEventListener('keydown', (e) => {
+            if (!keys[e.key]) {
+                keys[e.key] = true;
+                handleKeyPress(e.key);
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+
+        function handleKeyPress(key) {
+            const keyMap = {
+                'w': 'forward',
+                's': 'backward',
+                'a': 'left',
+                'd': 'right',
+                'q': 'turn_left',
+                'e': 'turn_right',
+                'ArrowUp': 'pitch_up',
+                'ArrowDown': 'pitch_down',
+                'ArrowLeft': 'roll_left',
+                'ArrowRight': 'roll_right',
+                ' ': 'jump',
+                'r': 'reset',
+                'p': 'pause'
+            };
+
+            if (keyMap[key]) {
+                sendControl('keyboard', { key: keyMap[key] });
+            }
+        }
+
+        // Button controls
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            sendControl('reset');
+        });
+
+        document.getElementById('pauseBtn').addEventListener('click', () => {
+            sendControl('pause');
+        });
+
+        document.getElementById('standBtn').addEventListener('click', () => {
+            sendControl('stand');
+        });
+
+        // Initialize connection
+        connect();
+    </script>
+</body>
+</html>
